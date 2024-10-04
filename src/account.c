@@ -1,4 +1,5 @@
 #include "account.h"
+#include "fileManagement.h" 
 
 #define RESET "\033[0m"
 #define RED "\033[31m"
@@ -6,15 +7,14 @@
 #define YELLOW "\033[33m"
 #define CYAN "\033[36m"
 
-// Function to create a new account
 Account* createAccount(const char* username, const char* password, const char* fullName) {
     Account* newAccount = (Account*)malloc(sizeof(Account));
     if (newAccount) {
         newAccount->accountNumber = accountGen();
         strcpy(newAccount->username, username);
         strcpy(newAccount->password, password);
-        strcpy(newAccount->fullName, fullName); // Store full name
-        newAccount->amount = 0; // Initial amount set to 0
+        strcpy(newAccount->fullName, fullName);
+        newAccount->amount = 0;
         newAccount->next = NULL;
     }
     return newAccount;
@@ -32,22 +32,20 @@ void addAccount(Account** head, const char* username, const char* password, cons
     newAccount->next = *head;
     *head = newAccount;
 
-    // Save the accounts to the file after adding
-    saveFile(*head, "database.txt");
+    saveFile(*head, "data/database.txt");
     printf("Account added successfully! Account Number: %d\n", newAccount->accountNumber);
 }
 
-// Function to login
+
 Account* login(Account* head, const char* username, const char* password) {
     for (Account* curr = head; curr != NULL; curr = curr->next) {
         if (strcmp(curr->username, username) == 0 && strcmp(curr->password, password) == 0) {
-            return curr; // Return the logged-in account
+            return curr; 
         }
     }
-    return NULL; // No matching account found
+    return NULL;
 }
 
-// Function to add funds to an account
 int addFunds(Account* head, int accountNumber, int amount) {
     if (amount <= 0) {
         printf(RED "Error: Amount to add must be a positive value.\n" RESET);
@@ -56,7 +54,6 @@ int addFunds(Account* head, int accountNumber, int amount) {
 
     Account* account = NULL;
 
-    // Find the account
     for (Account* curr = head; curr != NULL; curr = curr->next) {
         if (curr->accountNumber == accountNumber) {
             account = curr;
@@ -71,8 +68,7 @@ int addFunds(Account* head, int accountNumber, int amount) {
 
     account->amount += amount;
 
-    // Save the accounts to the file after adding funds
-    saveFile(head, "database.txt");
+    saveFile(head, "data/database.txt");
     printf(GREEN "Successfully added %d to Account Number %d. New Balance: %d\n" RESET, amount, accountNumber, account->amount);
     return 0;
 }
@@ -91,7 +87,6 @@ void displayAccounts(const Account* head) {
     }
 }
 
-// Function -> Transfer Amount
 int transferAmount(Account* head, int fromAccount, int toAccount, int amount) {
     if (amount <= 0) {
         printf(RED "Error: Transfer amount must be a positive value.\n" RESET);
@@ -101,7 +96,6 @@ int transferAmount(Account* head, int fromAccount, int toAccount, int amount) {
     Account* from = NULL;
     Account* to = NULL;
 
-    // Find both accounts
     for (Account* curr = head; curr != NULL; curr = curr->next) {
         if (curr->accountNumber == fromAccount) {
             from = curr;
@@ -121,17 +115,22 @@ int transferAmount(Account* head, int fromAccount, int toAccount, int amount) {
         return -1;
     }
 
-    // Transfer the amount
     from->amount -= amount;
     to->amount += amount;
 
-    // Save changes to the file
-    saveFile(head, "database.txt");
-    printf(GREEN "Successfully transferred %d from Account %d to Account %d. New Balance: %d\n" RESET, amount, fromAccount, from->amount);
+    // Save the accounts to the file after transferring
+    saveFile(head, "data/database.txt");
+    printf(GREEN "Successfully transferred %d from Account Number %d to Account Number %d.\n" RESET, amount, fromAccount, toAccount);
     return 0;
 }
 
-// Function -> Free Memory Allocated for Accounts
+// Function to generate a unique account number
+int accountGen() {
+    static int lastAccountNumber = 1000; // Starting account number
+    return lastAccountNumber++;
+}
+
+// Function to free all accounts
 void freeAccounts(Account* head) {
     Account* temp;
     while (head != NULL) {
@@ -139,52 +138,4 @@ void freeAccounts(Account* head) {
         head = head->next;
         free(temp);
     }
-}
-
-int accountGen() {
-    static int accountNumber = 1001; // Initialization 1000
-    return accountNumber++;
-}
-
-// Function -> Save Accounts
-void saveFile(Account* head, const char* filename) {
-    FILE* file = fopen(filename, "w");
-    if (!file) {
-        printf("Error opening file for writing.\n");
-        return;
-    }
-
-    while (head != NULL) {
-        fprintf(file, "%d,%s,%s,%s,%d\n", head->accountNumber, head->username, head->password, head->fullName, head->amount);
-        head = head->next;
-    }
-
-    fclose(file);
-}
-
-// Function to load accounts from a text file
-void dbAccount(Account** head, const char* filename) {
-    FILE* file = fopen(filename, "r");
-    if (!file) {
-        printf("No existing account file found. Starting with an empty list.\n");
-        return;
-    }
-
-    char line[256];
-    while (fgets(line, sizeof(line), file)) {
-        int accountNumber;
-        char username[50], password[50], fullName[100]; // Added full name
-        int amount;
-
-        sscanf(line, "%d,%49[^,],%49[^,],%99[^,],%d", &accountNumber, username, password, fullName, &amount);
-        Account* newAccount = createAccount(username, password, fullName); // Pass full name
-        if (newAccount) {
-            newAccount->accountNumber = accountNumber; // Use the loaded account number
-            newAccount->amount = amount; // Set the loaded amount
-            newAccount->next = *head; // Add to the beginning of the list
-            *head = newAccount;
-        }
-    }
-
-    fclose(file);
 }

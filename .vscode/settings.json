@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "file_operation.h": "c",
-        "utils.h": "c"
+        "utils.h": "c",
+        "filemanagement.h": "c",
+        "account.h": "c",
+        "time.h": "c"
     }
 }

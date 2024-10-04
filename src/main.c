@@ -1,10 +1,10 @@
 #include "account.h"
+#include "fileManagement.h" 
 
 #ifdef _WIN32
     #define CLEAR "cls"
 #endif
 
-// Define ANSI color codes
 #define RESET "\033[0m"
 #define RED "\033[31m"
 #define GREEN "\033[32m"
@@ -13,7 +13,7 @@
 
 int main() {
     Account* head = NULL;
-    dbAccount(&head, "database.txt");
+    dbAccount(&head, "data/database.txt");
 
     int choice;
     char username[50];
@@ -125,7 +125,7 @@ int main() {
 
             default:
                 printf(RED "Invalid option! Please choose between 1-3.\n" RESET);
-                exit(1);
+                // exit(1);
         }
     } while (choice != 3);
 
