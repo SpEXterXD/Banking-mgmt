@@ -1,45 +1,19 @@
-# Makefile for the Banking Management System
-
 CC = gcc
 CFLAGS = -Wall -Iinclude
-SRC_DIR = src
-OBJ_DIR = obj
-BIN_DIR = bin
-DATA_DIR = data
 
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/account.c $(SRC_DIR)/fileManagement.c
-OBJS = $(OBJ_DIR)/main.o $(OBJ_DIR)/account.o $(OBJ_DIR)/fileManagement.o
-TARGET = $(BIN_DIR)/banking_management
+all: banking_management
 
-# Default target
-all: $(TARGET)
+banking_management: src/main.o src/account.o src/fileManagement.o
+	$(CC) -o banking_management src/main.o src/account.o src/fileManagement.o
 
-# Compile and link the target
-$(TARGET): $(OBJS) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
+src/main.o: src/main.c
+	$(CC) $(CFLAGS) -c src/main.c
 
-# Compile object files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+src/account.o: src/account.c
+	$(CC) $(CFLAGS) -c src/account.c
 
-# Create the object directory
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+src/fileManagement.o: src/fileManagement.c
+	$(CC) $(CFLAGS) -c src/fileManagement.c
 
-# Create the binary directory
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
-
-# Clean up build files
 clean:
-	rm -rf $(OBJ_DIR) $(BIN_DIR)
-
-# Run the application
-run: $(TARGET)
-	./$(TARGET)
-
-# Create the data directory if not exists
-$(DATA_DIR):
-	mkdir -p $(DATA_DIR)
-
-.PHONY: all clean run
+	rm -f src/*.o banking_management
