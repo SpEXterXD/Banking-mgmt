@@ -22,7 +22,7 @@ A simple console-based banking management system that allows users to create acc
 To compile the program, navigate to the `src` directory and run the following command:
 
 ```bash
-gcc -o banking_management main.c account.c fileManagement.c
+gcc -o banking_management.exe src\main.c src\account.c src\fileManagement.c -Iinclude -Wall
 ```
 
 ## Possible Future Updates
